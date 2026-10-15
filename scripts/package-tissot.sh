@@ -17,11 +17,11 @@ git -C "$work/ak3" checkout --detach FETCH_HEAD
 rm -rf "$work/ak3/.git" "$work/ak3/modules" "$work/ak3/patch" "$work/ak3/ramdisk"
 cp "$image" "$work/ak3/Image.gz-dtb"
 sed -i \
-    -e 's/^kernel.string=.*/kernel.string=Another Next SUSFS - tissot A15 Treble EXPERIMENTAL/' \
+    -e 's/^kernel.string=.*/kernel.string=Another Next SUSFS r2 - tissot A15 Treble EXPERIMENTAL/' \
     -e 's/^supported.versions=.*/supported.versions=15/' \
     "$work/ak3/anykernel.sh"
 cp artifacts/build-info.txt "$work/ak3/build-info.txt"
-zipname=Another-Tissot-A15-Treble-Next-SUSFS-EXPERIMENTAL.zip
+zipname=Another-Tissot-A15-Treble-Next-SUSFS-r2-EXPERIMENTAL.zip
 (cd "$work/ak3" && zip -qr9 "$destination/$zipname" .)
 unzip -tq "$destination/$zipname"
 (cd "$destination" && sha256sum "$zipname" >> SHA256SUMS)

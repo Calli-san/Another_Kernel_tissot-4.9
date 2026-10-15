@@ -31,6 +31,13 @@ for symbol in KSU KSU_MANUAL_HOOK KSU_SUSFS THREAD_INFO_IN_TASK; do
         exit 1
     }
 done
+for symbol in INITRAMFS_IGNORE_SKIP_FLAG PROC_CMDLINE_APPEND_ANDROID_FORCE_NORMAL_BOOT PSTORE_LZ4_COMPRESS; do
+    grep -qx "# CONFIG_${symbol} is not set" "$OUT_DIR/.config" || {
+        echo "Unexpected CONFIG_${symbol}; A15 Treble reference has it disabled." >&2
+        exit 1
+    }
+done
+grep -qx 'CONFIG_PSTORE_ZLIB_COMPRESS=y' "$OUT_DIR/.config"
 make -j"$JOBS" O="$OUT_DIR" HOSTCFLAGS='-O2 -fcommon' Image.gz-dtb
 test -s "$OUT_DIR/arch/arm64/boot/Image.gz-dtb"
 mkdir -p artifacts

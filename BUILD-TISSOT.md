@@ -47,7 +47,7 @@ temporary wrappers for GCC 10 without overwriting system compilers.
 GitHub Actions also builds this branch and uploads a single artifact containing
 the image, effective configuration, provenance, checksums, and installer ZIP.
 Extract the outer Actions artifact ZIP: the installer is the inner
-`Another-Tissot-A15-Treble-Next-SUSFS-EXPERIMENTAL.zip`.
+`Another-Tissot-A15-Treble-Next-SUSFS-r2-EXPERIMENTAL.zip`.
 
 ## Validation and device testing
 
@@ -69,3 +69,27 @@ No integrity-check or application-compatibility result is promised.
 
 Credits: the kernel authors, KernelSU/KernelSU Next developers, simonpunk,
 sidex15, wxx9248, osm0sis, and the tissot AnyKernel template maintainer.
+
+## Revision 2: first device failure investigation
+
+The first image installed successfully but rebooted at the device logo.
+A retained `dmesg-ramoops-0` record identifies the failed kernel by its
+`Another-Next-SUSFS-Treble` release. The remaining trace is from a secondary
+CPU being stopped during panic; it does not establish that CPU idle is the
+faulting subsystem. The primary panic message was not retained.
+
+The supplied working boot backup passed its SHA-256 check. Its tissot DTB
+is byte-identical to this tree's DTB (SHA-256
+`ee4d46f836ebdbb50b4cd4b3a74734bb7b7e5f114ef5fd92abbfb88ca79d2317`).
+The backup ramdisk contains recovery, and the embedded ReLIFE config disables
+`INITRAMFS_IGNORE_SKIP_FLAG` and
+`PROC_CMDLINE_APPEND_ANDROID_FORCE_NORMAL_BOOT`. Revision 2 matches those
+boot settings rather than forcing the recovery ramdisk into normal boot.
+This is an evidence-backed compatibility correction, not a proven root cause.
+
+Pstore compression now matches ReLIFE's zlib. The tissot backend retains
+multiple 4 KiB panic records, up to a 128 KiB snapshot, instead of discarding
+all parts after the first. Physical addresses, record size and the persistent
+RAM layout remain unchanged so recovery/working kernels can read them.
+Revision 2 still requires device validation. If it fails, enter recovery
+without booting Android repeatedly and collect all files from `/sys/fs/pstore`.

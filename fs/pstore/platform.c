@@ -99,7 +99,11 @@ static char *big_oops_buf;
 static size_t big_oops_buf_sz;
 
 /* How much of the console log to snapshot */
+#ifdef CONFIG_MACH_XIAOMI_TISSOT
+static unsigned long kmsg_bytes = 128 * 1024;
+#else
 static unsigned long kmsg_bytes = 10240;
+#endif
 
 void pstore_set_kmsg_bytes(int bytes)
 {

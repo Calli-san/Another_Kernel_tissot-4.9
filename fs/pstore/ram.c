@@ -329,8 +329,13 @@ static int notrace ramoops_pstore_write_buf(enum pstore_type_id type,
 	 * and if our buffer is smaller than kmsg_bytes, we don't want the
 	 * report split across multiple records.
 	 */
+#ifndef CONFIG_MACH_XIAOMI_TISSOT
 	if (part != 1)
 		return -ENOSPC;
+#endif
+	/* tissot uses 4 KiB records. Keep older parts of a panic too, without
+	 * changing the persistent RAM layout expected by recovery/ReLIFE.
+	 */
 
 	if (!cxt->przs)
 		return -ENOSPC;
