@@ -93,3 +93,19 @@ all parts after the first. Physical addresses, record size and the persistent
 RAM layout remain unchanged so recovery/working kernels can read them.
 Revision 2 still requires device validation. If it fails, enter recovery
 without booting Android repeatedly and collect all files from `/sys/fs/pstore`.
+
+The supplied ramdisk is Magisk-patched, and the working kernel contains the
+Magisk `skip_initramfs` -> `want_initramfs` string patch. Config differences
+alone therefore do not explain its effective boot behaviour. AK3's default
+Magisk-preservation path would apply that kernel patch again. Revision 2 uses
+Magisk's own CPIO `restore` operation on the installer's working ramdisk before
+repacking, verifies that it is stock, and avoids that preservation path. It
+restores the original init from the embedded backup; it does not delete
+`/data/adb` or uninstall applications. The separately saved boot backup remains
+the rollback image, including its previous Magisk setup.
+
+The original template also recursively set ramdisk files to mode 0644,
+then only restored execute permissions for root init/sbin paths. This can
+remove execute permission from recovery-as-boot `/system/bin` binaries.
+Revision 2 removes those blanket chmod/chown calls and retains original
+CPIO ownership, executable modes and symlinks.
