@@ -47,14 +47,15 @@ temporary wrappers for GCC 10 without overwriting system compilers.
 GitHub Actions also builds this branch and uploads a single artifact containing
 the image, effective configuration, provenance, checksums, and installer ZIP.
 Extract the outer Actions artifact ZIP: the installer is the inner
-`Another-Tissot-A15-Treble-Next-SUSFS-r2-EXPERIMENTAL.zip`.
+`Another-Tissot-A15-Treble-Next-SUSFS-r3-EXPERIMENTAL.zip`.
 
 ## Validation and device testing
 
 Compilation and linking only validate the build. Booting, KernelSU privilege
 management, module mounting, SUSFS behaviour, Wi-Fi, cameras, mobile data,
 fingerprint, encryption, and suspend require tests on the target phone.
-No on-device validation has been performed by this change.
+The user confirms R2 boots and detects Next/SUSFS. Full hardware validation
+is pending. R3 has not yet been tested on the phone.
 
 Before testing, retain a backup of the current active-slot boot partition and
 a working recovery/restore method. The installer checks the tissot device and
@@ -91,7 +92,7 @@ Pstore compression now matches ReLIFE's zlib. The tissot backend retains
 multiple 4 KiB panic records, up to a 128 KiB snapshot, instead of discarding
 all parts after the first. Physical addresses, record size and the persistent
 RAM layout remain unchanged so recovery/working kernels can read them.
-Revision 2 still requires device validation. If it fails, enter recovery
+The user confirms Revision 2 boots. If a later revision fails, enter recovery
 without booting Android repeatedly and collect all files from `/sys/fs/pstore`.
 
 The supplied ramdisk is Magisk-patched, and the working kernel contains the
@@ -109,3 +110,22 @@ then only restored execute permissions for root init/sbin paths. This can
 remove execute permission from recovery-as-boot `/system/bin` binaries.
 Revision 2 removes those blanket chmod/chown calls and retains original
 CPIO ownership, executable modes and symlinks.
+
+## Revision 3: allow Next's init transition on nosuid mounts
+
+The supplied live R2 dmesg records `security_bounded_transition` denying
+`u:r:init:s0` -> `u:r:ksu:s0`. All three init-launched ksud boot stages
+(post-fs-data, services, boot-completed) then fail to exec with EACCES/status
+127. Root requests still work, but module startup does not run.
+
+The baseline check_nnp_nosuid exception hard-coded the old `u:r:su:s0`
+domain. Replace it with Next's pinned `is_ksu_transition` helper, guarded by
+CONFIG_KSU. The helper permits only init -> the configured Next domain;
+other NNP/nosuid transitions still go through the existing bounded check.
+Global SELinux enforcement is unchanged.
+
+The ROM also reports `service logd not found` with both ReLIFE and R2.
+That is a separate observed logging issue; R3 does not claim to repair it.
+The earlier archived KSU logs identify ReLIFE and must not be treated as
+current R2 daemon logs. Confirm R3 boots, ksud stages exit successfully and
+Zygisk reports active before declaring this issue resolved.
