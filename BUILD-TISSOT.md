@@ -47,7 +47,7 @@ temporary wrappers for GCC 10 without overwriting system compilers.
 GitHub Actions also builds this branch and uploads a single artifact containing
 the image, effective configuration, provenance, checksums, and installer ZIP.
 Extract the outer Actions artifact ZIP: the installer is the inner
-`Another-Tissot-A15-Treble-Next-SUSFS-r3-EXPERIMENTAL.zip`.
+`Another-Tissot-A15-Treble-Next-SUSFS-r4-EXPERIMENTAL.zip`.
 
 ## Validation and device testing
 
@@ -129,3 +129,25 @@ That is a separate observed logging issue; R3 does not claim to repair it.
 The earlier archived KSU logs identify ReLIFE and must not be treated as
 current R2 daemon logs. Confirm R3 boots, ksud stages exit successfully and
 Zygisk reports active before declaring this issue resolved.
+
+## Revision 4: fingerprint thaw comparison bounds
+
+With all user modules disabled, the phone still restarted during idle.
+The new pstore includes R3 Oops/Panic records with `detected buffer overflow
+in memcmp`, `fortify_panic` and `thaw_fingerprintd+0xbc/0x180` in the
+suspend/resume path. This establishes a kernel bug independently of the
+previous module-startup issue; it does not establish that every reported
+restart has the same cause.
+
+The baseline thaw_fingerprintd compared 13 bytes against the 7-byte literal
+`"gx_fpd"` (including NUL). Replace that comparison with strcmp to match the
+complete process name without reading beyond the literal. Preserve the
+existing Android HAL prefix comparisons and thaw timing. FORTIFY remains
+enabled. An isolated harness using the actual function reproduces the old
+global-buffer-overflow with AddressSanitizer; the fixed function passes six
+matching/nonmatching cases under AddressSanitizer/UBSan (leak detection
+disabled due to the host execution environment).
+
+R4 requires a full kernel build and target-phone suspend/resume validation.
+Start with modules disabled and repeat idle testing, fingerprint unlock and
+normal reboot. Instagram video corruption remains separately unresolved.
