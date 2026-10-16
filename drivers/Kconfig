@@ -215,5 +215,4 @@ source "drivers/tee/Kconfig"
 source "drivers/kernelsu/Kconfig"
 
 source "drivers/memkernel/Kconfig"
-source "drivers/memkernel/Kconfig"
 endmenu
