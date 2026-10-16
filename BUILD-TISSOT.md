@@ -47,7 +47,7 @@ temporary wrappers for GCC 10 without overwriting system compilers.
 GitHub Actions also builds this branch and uploads a single artifact containing
 the image, effective configuration, provenance, checksums, and installer ZIP.
 Extract the outer Actions artifact ZIP: the installer is the inner
-`Another-Tissot-A15-Treble-Next-SUSFS-r4-EXPERIMENTAL.zip`.
+`Another-Tissot-A15-Treble-Next-SUSFS-r5-EXPERIMENTAL.zip`.
 
 ## Validation and device testing
 
@@ -55,7 +55,8 @@ Compilation and linking only validate the build. Booting, KernelSU privilege
 management, module mounting, SUSFS behaviour, Wi-Fi, cameras, mobile data,
 fingerprint, encryption, and suspend require tests on the target phone.
 The user confirms R2 boots and detects Next/SUSFS. Full hardware validation
-is pending. R3 has not yet been tested on the phone.
+is pending. R3 module startup and R4 suspend/resume fixes have been tested on the phone.
+R5's packaged boot-parameter change still requires installation/reboot validation.
 
 Before testing, retain a backup of the current active-slot boot partition and
 a working recovery/restore method. The installer checks the tissot device and
@@ -151,3 +152,57 @@ disabled due to the host execution environment).
 R4 requires a full kernel build and target-phone suspend/resume validation.
 Start with modules disabled and repeat idle testing, fingerprint unlock and
 normal reboot. Instagram video corruption remains separately unresolved.
+
+## Revision 5: persist the tested CPU idle setting
+
+The phone's runtime lpm_levels.sleep_disabled was Y. In this tree,
+cpu_power_select returns level 0 early when it is enabled for non-isolated
+CPUs, preventing selection of deeper cpuidle levels. Full-system suspend is
+a separate mechanism and was observed working on R4.
+
+With unchanged R4 and a temporary runtime change to N, the user measured
+58% -> 58% over ~48m41s, compared with 60% -> 57% over ~44m31s with Y.
+The user subsequently reports improved idle drain and normal sleep/wake,
+fingerprint operation and stability through the day. Rounded percentages
+and short comparisons do not establish an exact savings figure or residency.
+
+R5 calls the pinned AnyKernel3 patch_cmdline helper to replace or append
+lpm_levels.sleep_disabled=0 in the repacked boot image. It does not change
+the cpuidle driver, frequency/voltage settings or runtime parameter permissions.
+This persists the tested setting across reboots when installed using this ZIP.
+Flashing Image.gz-dtb through a different installer does not apply this policy.
+Installing the older R4 ZIP over an R5 boot does not restore the old command
+line automatically; restore the saved pre-R5 boot image for a full rollback.
+
+After installing, confirm the r5 release and check:
+
+```sh
+uname -r
+cat /sys/module/lpm_levels/parameters/sleep_disabled
+```
+
+Expected parameter: N. Verify it again after another normal reboot. Continue
+idle/resume/fingerprint testing with the same module/network configuration.
+To temporarily restore the old behaviour for diagnosis:
+
+```sh
+echo Y > /sys/module/lpm_levels/parameters/sleep_disabled
+```
+
+That runtime override lasts until it is changed or the phone reboots.
+GPU perf-counter warnings, USB MTP allocation warnings and ROM video
+corruption remain separate issues and are not addressed in this revision.
+
+## KernelSU-only installer policy (R5)
+
+The packaged AnyKernel3 core is patched at its pinned revision to remove
+Magisk-preservation, skip_initramfs hex-patching and Magisk-state export.
+Its newly packed ramdisk must test stock or installation aborts. The existing
+pre-unpack restore step remains: it uses an old Magisk ramdisk's embedded
+original backup to clean the installer's working copy before KernelSU boots.
+No Magisk root service/init payload is installed by this package.
+
+magiskboot remains an offline boot-image/CPIO utility inside the recovery
+installer, not a second root implementation. Existing /data/adb contents and
+installed apps are not deleted. Unsupported/patched ramdisks without a valid
+restore path must be restored from a clean boot backup before installation.

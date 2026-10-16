@@ -1,6 +1,6 @@
 # AnyKernel3 installer for the experimental tissot Next/SUSFS build.
 properties() { '
-kernel.string=Another Next SUSFS r2 - tissot A15 Treble EXPERIMENTAL
+kernel.string=Another Next SUSFS r5 - tissot A15 Treble EXPERIMENTAL
 do.devicecheck=1
 do.modules=0
 do.systemless=0
@@ -39,5 +39,8 @@ unpack_ramdisk;
 
 # Preserve the ownership, modes and symlinks extracted from the original CPIO.
 # There are no added ramdisk files requiring permission changes.
+# Persist the runtime-tested CPU idle setting in the repacked boot command line.
+# Keep the module parameter writable for troubleshooting after installation.
+patch_cmdline "lpm_levels.sleep_disabled" "lpm_levels.sleep_disabled=0";
 write_boot;
-ui_print "Experimental r2 kernel installed. Device boot remains unverified.";
+ui_print "Experimental r5 kernel installed. Verify sleep_disabled=N after reboot.";
