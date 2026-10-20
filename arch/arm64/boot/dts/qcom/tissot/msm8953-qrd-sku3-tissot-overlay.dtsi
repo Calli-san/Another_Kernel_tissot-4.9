@@ -12,3 +12,7 @@
 #include "msm8953-tissot.dtsi"
 #include "msm8953-qrd-tissot.dtsi"
 #include "msm8953-regulator-tissot.dtsi"
+
+
+/* OC-Test is scoped to the tissot DTB. */
+#include "msm8953-oc-test.dtsi"

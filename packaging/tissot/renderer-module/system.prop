@@ -1,0 +1,2 @@
+# Global HWUI policy, not a video decoder setting or Vulkan driver replacement.
+debug.hwui.renderer=skiagl

@@ -1,0 +1,6 @@
+id=tissot_oc_test_renderer
+name=Tissot OC-Test - HWUI OpenGL workaround
+version=1.0
+versionCode=1
+author=Calli-san
+description=Selects HWUI Skia OpenGL (skiagl) globally at boot. Tested as an Instagram video corruption workaround on Rising Revived 6.2.1 A15 tissot. Does not replace graphics drivers or disable Vulkan APIs.

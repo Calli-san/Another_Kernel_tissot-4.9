@@ -1,0 +1,77 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * OC-Test1: tissot reference phone is speed bin 2, PVS 0.
+ * Preserve the stock CPR calibration/frequency anchors and corner counts.
+ * The added CPU rates vote the existing highest corner (7), with a bounded
+ * +25 mV open/closed-loop target adjustment for that corner below.
+ * These are experimental targets, not characterized silicon guarantees.
+ */
+
+&clock_cpu {
+	qcom,speed2-bin-v0-cl =
+		<         0 0>,
+		< 652800000 1>,
+		<1036800000 2>,
+		<1401600000 3>,
+		<1689600000 4>,
+		<1804800000 5>,
+		<1958400000 6>,
+		<2016000000 7>,
+		<2150400000 7>,
+		<2208000000 7>,
+		<2304000000 7>;
+
+	/* Shared PLL couples CCI to CPU / 2.5: 2304 / 2.5 = 921.6 MHz. */
+	qcom,speed2-bin-v0-cci =
+		<        0 0>,
+		<261120000 1>,
+		<414720000 2>,
+		<560640000 3>,
+		<675840000 4>,
+		<721920000 5>,
+		<783360000 6>,
+		<806400000 7>,
+		<860160000 7>,
+		<883200000 7>,
+		<921600000 7>;
+};
+
+&msm_cpufreq {
+	qcom,cpufreq-table =
+		<652800>, <1036800>, <1401600>, <1689600>, <1804800>,
+		<1958400>, <2016000>, <2150400>, <2208000>, <2304000>;
+};
+
+&apc_vreg {
+	/* Per-speed-bin arrays, in the original supported-bin order 0, 2, 6, 7.
+	 * Only bin 2's highest corner changes, including its stock 2016 MHz OPP.
+	 * Existing 1065000 uV ceiling and 1140000 uV physical limits remain.
+	 */
+	qcom,cpr-open-loop-voltage-adjustment =
+		<0 0 0 0 0 0 0 0 0>,
+		<0 0 0 0 0 0 25000>,
+		<0 0 0 0 0 0 0>,
+		<0 0 0 0 0 0 0 0 0>;
+	qcom,cpr-closed-loop-voltage-adjustment =
+		<0 0 0 0 0 0 0 0 0>,
+		<0 0 0 0 0 0 25000>,
+		<0 0 0 0 0 0 0>,
+		<0 0 0 0 0 0 0 0 0>;
+};
+
+&clock_gcc_gfx {
+	/* GPU voltage remains the existing RPM-managed TURBO corner. */
+	qcom,gfxfreq-corner =
+		<        0 0>, <133330000 1>, <216000000 2>, <320000000 3>,
+		<400000000 4>, <510000000 5>, <560000000 6>,
+		<650000000 7>, <680000000 7>;
+};
+
+&msm_gpu {
+	/* Keep power-level indices, lower OPPs, bus votes and idle policy intact. */
+	qcom,gpu-pwrlevels {
+		qcom,gpu-pwrlevel@0 {
+			qcom,gpu-freq = <680000000>;
+		};
+	};
+};

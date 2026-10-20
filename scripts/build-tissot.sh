@@ -51,6 +51,11 @@ cp "$OUT_DIR/.config" artifacts/kernel.config
     echo 'susfs_commit=71345ded5af28f55d76ebcdc7a9df9cea56111e1'
     "${CROSS_COMPILE}gcc" --version | head -n1
     echo 'device=tissot; target=Android 15 Treble; on_device_test=not_performed'
+    echo 'variant=OC-Test1; cpu_target_hz=2304000000; gpu_target_hz=680000000'
+    echo 'cpu_oc_scope=speed-bin-2-pvs-0; cpu_corner7_adjustment_uv=25000'
+    echo 'cpu_cpr_ceiling_uv=1065000; gpu_voltage_policy=stock-TURBO'
+    echo 'renderer=optional-companion-KernelSU-module; hwui=skiagl'
 } > artifacts/build-info.txt
 (cd artifacts && sha256sum Image.gz-dtb > SHA256SUMS)
 echo 'Build complete. Boot/root/SUSFS behaviour still requires device testing.'
+
