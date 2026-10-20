@@ -1,6 +1,6 @@
-# AnyKernel3 installer for the experimental tissot Next/SUSFS build.
+# AnyKernel3 installer for the tissot Next/SUSFS Beta 1 build.
 properties() { '
-kernel.string=Another Next SUSFS r5 - tissot A15 Treble EXPERIMENTAL
+kernel.string=Another Next SUSFS Beta 1 (r5) - tissot A15 Treble
 do.devicecheck=1
 do.modules=0
 do.systemless=0
@@ -43,4 +43,5 @@ unpack_ramdisk;
 # Keep the module parameter writable for troubleshooting after installation.
 patch_cmdline "lpm_levels.sleep_disabled" "lpm_levels.sleep_disabled=0";
 write_boot;
-ui_print "Experimental r5 kernel installed. Verify sleep_disabled=N after reboot.";
+ui_print "Beta 1 (r5) installed. Verify sleep_disabled=N after reboot.";
+

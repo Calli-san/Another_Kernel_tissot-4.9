@@ -1,4 +1,4 @@
-name: Tissot A15 Treble - Next legacy and SUSFS (experimental)
+name: Tissot A15 Treble - Next legacy and SUSFS Beta 1
 
 on:
   push:
@@ -40,13 +40,13 @@ jobs:
           set -o pipefail
           bash scripts/build-tissot.sh 2>&1 | tee kernel_build.log
 
-      - name: Package experimental AnyKernel ZIP
+      - name: Package Beta 1 AnyKernel ZIP
         run: bash scripts/package-tissot.sh
 
       - name: Upload kernel and installer
         uses: actions/upload-artifact@v4
         with:
-          name: Tissot-A15-Treble-Next-SUSFS-EXPERIMENTAL
+          name: Tissot-A15-Treble-Next-SUSFS-Beta1-r5
           path: artifacts/
           if-no-files-found: error
           retention-days: 30
@@ -59,3 +59,4 @@ jobs:
           path: kernel_build.log
           if-no-files-found: ignore
           retention-days: 7
+

@@ -1,9 +1,10 @@
-# Experimental tissot Android 15 Treble build
+# Tissot Android 15 Treble — Beta 1 (r5)
 
 Target: Xiaomi Mi A1 (`tissot`), arm64, Linux 4.9.337, Treble.
 The reference phone reports `4.9.337-ReLIFE-Treble` and runs Rising Revived
 6.2.1 Android 15 (a daisy port). Matching the kernel series is necessary but
-does not prove that this different kernel tree will boot that ROM.
+does not prove compatibility with other ROMs or devices. This build has been
+tested on the reference phone described below.
 
 ## Sources and version pins
 
@@ -47,16 +48,28 @@ temporary wrappers for GCC 10 without overwriting system compilers.
 GitHub Actions also builds this branch and uploads a single artifact containing
 the image, effective configuration, provenance, checksums, and installer ZIP.
 Extract the outer Actions artifact ZIP: the installer is the inner
-`Another-Tissot-A15-Treble-Next-SUSFS-r5-EXPERIMENTAL.zip`.
+`Another-Tissot-A15-Treble-Next-SUSFS-Beta1-r5.zip`.
 
 ## Validation and device testing
 
 Compilation and linking only validate the build. Booting, KernelSU privilege
 management, module mounting, SUSFS behaviour, Wi-Fi, cameras, mobile data,
 fingerprint, encryption, and suspend require tests on the target phone.
-The user confirms R2 boots and detects Next/SUSFS. Full hardware validation
-is pending. R3 module startup and R4 suspend/resume fixes have been tested on the phone.
-R5's packaged boot-parameter change still requires installation/reboot validation.
+Beta 1 is the r5 kernel promoted after the owner reported normal daily use
+from 2026-10-16 through 2026-10-20 on Rising Revived 6.2.1 Android 15:
+no unexpected reboots, normal sleep/wake and fingerprint, acceptable
+performance, and normal battery/idle behaviour with their module setup.
+The previously built and tested kernel source is
+`cefc32a9d6a956f6107b35dbadac0e318c67172f`. Promotion changes documentation
+and package labels only; the defconfig and kernel code remain identical.
+This is the first daily-use beta baseline, not a guarantee for every device,
+ROM, module combination or workload.
+
+The ROM's scrambled Instagram video was separately resolved in the owner's
+runtime test by selecting `debug.hwui.renderer=skiagl`, confirmed as
+`Pipeline=Skia (OpenGL)`. Beta 1 does not install that global userspace
+workaround. Logcat was unavailable because init could not find its logd
+service; no logging, graphics-driver or vendor patch is included here.
 
 Before testing, retain a backup of the current active-slot boot partition and
 a working recovery/restore method. The installer checks the tissot device and
@@ -206,3 +219,4 @@ magiskboot remains an offline boot-image/CPIO utility inside the recovery
 installer, not a second root implementation. Existing /data/adb contents and
 installed apps are not deleted. Unsupported/patched ramdisks without a valid
 restore path must be restored from a clean boot backup before installation.
+

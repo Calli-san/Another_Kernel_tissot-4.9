@@ -21,8 +21,9 @@ rm -rf "$work/ak3/.git" "$work/ak3/modules" "$work/ak3/patch" "$work/ak3/ramdisk
 cp "$image" "$work/ak3/Image.gz-dtb"
 cp packaging/tissot/anykernel.sh "$work/ak3/anykernel.sh"
 cp artifacts/build-info.txt "$work/ak3/build-info.txt"
-zipname=Another-Tissot-A15-Treble-Next-SUSFS-r5-EXPERIMENTAL.zip
+zipname=Another-Tissot-A15-Treble-Next-SUSFS-Beta1-r5.zip
 (cd "$work/ak3" && zip -qr9 "$destination/$zipname" .)
 unzip -tq "$destination/$zipname"
 (cd "$destination" && sha256sum "$zipname" >> SHA256SUMS)
 echo "Created artifacts/$zipname (not tested on device)."
+
