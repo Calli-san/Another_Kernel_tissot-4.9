@@ -201,7 +201,7 @@ void thaw_fingerprintd(void)
 			(!memcmp(p->comm,"android.hardware.biometrics.fingerprint@2.1-service.xiaomi_msm8953", 13)) ||
 			(!memcmp(p->comm,"android.hardware.biometrics.fingerprint@2.1-service.custom", 13)) ||
 			(!memcmp(p->comm,"android.hardware.biometrics.fingerprint@2.1-service.land", 13)) ||
-			(!memcmp(p->comm,"gx_fpd", 13))) {
+			(!strcmp(p->comm, "gx_fpd"))) {
 			__thaw_task(p);
 			break;
 		}

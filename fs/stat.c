@@ -18,6 +18,19 @@
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
 
+#include "internal.h"
+
+#ifdef CONFIG_KSU_SUSFS
+#include <linux/susfs_def.h>
+#include <linux/version.h>
+#endif
+
+#ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
+extern bool susfs_is_inode_sus_kstat(struct inode *inode, bool *out_is_fuse);
+extern void susfs_sus_kstat_spoof_generic_fillattr(struct inode *inode, struct kstat *stat,
+			u32 result_mask);
+#endif
+
 void generic_fillattr(struct inode *inode, struct kstat *stat)
 {
 	stat->dev = inode->i_sb->s_dev;
@@ -52,12 +65,42 @@ EXPORT_SYMBOL(generic_fillattr);
 int vfs_getattr_nosec(struct path *path, struct kstat *stat)
 {
 	struct inode *inode = d_backing_inode(path->dentry);
+#ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
+	/*
+	 * Kernel 4.9 has no statx and therefore no kstat->result_mask, so the
+	 * STATX_SUS_KSTAT[_FUSE] marker upstream stores there is kept in a
+	 * local instead. Nothing outside this function needs it: fs/statfs.c
+	 * calls susfs_is_inode_sus_kstat() on its own, and kstat->mnt_id is
+	 * already gated on >= 5.10 inside susfs.c.
+	 */
+	u32 susfs_result_mask = 0;
+	int err;
 
+	if (susfs_is_current_app_uid()) {
+		bool is_fuse = false;
+
+		if (susfs_is_inode_sus_kstat(inode, &is_fuse))
+			susfs_result_mask = is_fuse ? STATX_SUS_KSTAT_FUSE : STATX_SUS_KSTAT;
+	}
+
+	if (inode->i_op->getattr) {
+		err = inode->i_op->getattr(path->mnt, path->dentry, stat);
+		if (!err && susfs_result_mask)
+			susfs_sus_kstat_spoof_generic_fillattr(inode, stat, susfs_result_mask);
+		return err;
+	}
+
+	generic_fillattr(inode, stat);
+	if (susfs_result_mask)
+		susfs_sus_kstat_spoof_generic_fillattr(inode, stat, susfs_result_mask);
+	return 0;
+#else
 	if (inode->i_op->getattr)
 		return inode->i_op->getattr(path->mnt, path->dentry, stat);
 
 	generic_fillattr(inode, stat);
 	return 0;
+#endif
 }
 
 EXPORT_SYMBOL(vfs_getattr_nosec);
@@ -87,7 +130,10 @@ int vfs_fstat(unsigned int fd, struct kstat *stat)
 }
 EXPORT_SYMBOL(vfs_fstat);
 
+#ifdef CONFIG_KSU
 extern int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
+
+#endif
 
 int vfs_fstatat(int dfd, const char __user *filename, struct kstat *stat,
 		int flag)
@@ -96,7 +142,9 @@ int vfs_fstatat(int dfd, const char __user *filename, struct kstat *stat,
 	int error = -EINVAL;
 	unsigned int lookup_flags = 0;
 
+#ifdef CONFIG_KSU
 	ksu_handle_stat(&dfd, &filename, &flag);
+#endif
 
 	if ((flag & ~(AT_SYMLINK_NOFOLLOW | AT_NO_AUTOMOUNT |
 		      AT_EMPTY_PATH)) != 0)
@@ -305,6 +353,10 @@ SYSCALL_DEFINE4(newfstatat, int, dfd, const char __user *, filename,
 }
 #endif
 
+#ifdef CONFIG_KSU
+extern void ksu_handle_newfstat_ret(unsigned int *fd, struct stat __user **statbuf);
+#endif
+
 SYSCALL_DEFINE2(newfstat, unsigned int, fd, struct stat __user *, statbuf)
 {
 	struct kstat stat;
@@ -312,6 +364,10 @@ SYSCALL_DEFINE2(newfstat, unsigned int, fd, struct stat __user *, statbuf)
 
 	if (!error)
 		error = cp_new_stat(&stat, statbuf);
+#ifdef CONFIG_KSU
+	if (!error)
+		ksu_handle_newfstat_ret(&fd, &statbuf);
+#endif
 
 	return error;
 }
