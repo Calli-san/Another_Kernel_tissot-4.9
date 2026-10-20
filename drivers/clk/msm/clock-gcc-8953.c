@@ -389,6 +389,8 @@ static struct clk_freq_tbl ftbl_gfx3d_clk_src[] = {
 	F_MM( 560000000,    1120000000,               gpll3,    1,    0,     0),
 	F_MM( 650000000,    1300000000,               gpll3,    1,    0,     0),
 
+	/* OC-Test: GPLL3 has a /2 output, so 680 MHz needs 1360 MHz. */
+	F_MM( 680000000,    1360000000,               gpll3,    1,    0,     0),
 	F_END
 };
 

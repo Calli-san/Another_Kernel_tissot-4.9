@@ -21,9 +21,17 @@ rm -rf "$work/ak3/.git" "$work/ak3/modules" "$work/ak3/patch" "$work/ak3/ramdisk
 cp "$image" "$work/ak3/Image.gz-dtb"
 cp packaging/tissot/anykernel.sh "$work/ak3/anykernel.sh"
 cp artifacts/build-info.txt "$work/ak3/build-info.txt"
-zipname=Another-Tissot-A15-Treble-Next-SUSFS-Beta1-r5.zip
+zipname=Another-Tissot-A15-Treble-Next-SUSFS-OC-Test1-CPU2304-GPU680.zip
 (cd "$work/ak3" && zip -qr9 "$destination/$zipname" .)
 unzip -tq "$destination/$zipname"
 (cd "$destination" && sha256sum "$zipname" >> SHA256SUMS)
 echo "Created artifacts/$zipname (not tested on device)."
 
+
+# Root userspace policy is reversible independently of the kernel/boot image.
+renderer_zip=Tissot-OC-Test1-Renderer-OpenGL.zip
+(cd packaging/tissot/renderer-module && zip -qr9 "$destination/$renderer_zip" .)
+unzip -tq "$destination/$renderer_zip"
+(cd "$destination" && sha256sum "$renderer_zip" >> SHA256SUMS)
+cp OC-TEST.md "$destination/OC-TEST.md"
+cp scripts/collect-oc-test.sh "$destination/collect-oc-test.sh"

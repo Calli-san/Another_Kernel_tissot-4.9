@@ -1,10 +1,15 @@
-# Tissot Android 15 Treble — Beta 1 (r5)
+# Tissot Android 15 Treble — OC-Test1
+
+**This branch is OC-Test1, an unvalidated overclock experiment based on Beta 1.**
+See [OC-TEST.md](OC-TEST.md) for clock/voltage scope, companion renderer module,
+installation, staged testing and rollback. The Beta 1 device reports below
+apply to the unmodified r5 baseline, not to this OC build.
 
 Target: Xiaomi Mi A1 (`tissot`), arm64, Linux 4.9.337, Treble.
 The reference phone reports `4.9.337-ReLIFE-Treble` and runs Rising Revived
 6.2.1 Android 15 (a daisy port). Matching the kernel series is necessary but
-does not prove compatibility with other ROMs or devices. This build has been
-tested on the reference phone described below.
+does not prove compatibility with other ROMs or devices. Only the Beta 1 baseline has been
+tested on the reference phone; OC-Test1 still requires hardware validation.
 
 ## Sources and version pins
 
@@ -48,7 +53,7 @@ temporary wrappers for GCC 10 without overwriting system compilers.
 GitHub Actions also builds this branch and uploads a single artifact containing
 the image, effective configuration, provenance, checksums, and installer ZIP.
 Extract the outer Actions artifact ZIP: the installer is the inner
-`Another-Tissot-A15-Treble-Next-SUSFS-Beta1-r5.zip`.
+`Another-Tissot-A15-Treble-Next-SUSFS-OC-Test1-CPU2304-GPU680.zip`.
 
 ## Validation and device testing
 

@@ -1,10 +1,10 @@
-name: Tissot A15 Treble - Next legacy and SUSFS Beta 1
+name: Tissot OC-Test1 - CPU2304 GPU680 and optional OpenGL
 
 on:
   push:
-    branches: [NON-OC, 'codex/ksunext-susfs-4.9']
+    branches: ['codex/oc-test']
   pull_request:
-    branches: [NON-OC]
+    branches: ['codex/ksunext-susfs-4.9']
   workflow_dispatch:
 
 permissions:
@@ -40,13 +40,16 @@ jobs:
           set -o pipefail
           bash scripts/build-tissot.sh 2>&1 | tee kernel_build.log
 
-      - name: Package Beta 1 AnyKernel ZIP
+      - name: Verify compiled OC device tree
+        run: python3 scripts/check-oc-test.py out/arch/arm64/boot/dts/qcom/msm8953-qrd-sku3-tissot.dtb
+
+      - name: Package OC-Test AnyKernel and renderer ZIPs
         run: bash scripts/package-tissot.sh
 
       - name: Upload kernel and installer
         uses: actions/upload-artifact@v4
         with:
-          name: Tissot-A15-Treble-Next-SUSFS-Beta1-r5
+          name: Tissot-A15-Treble-Next-SUSFS-OC-Test1
           path: artifacts/
           if-no-files-found: error
           retention-days: 30
